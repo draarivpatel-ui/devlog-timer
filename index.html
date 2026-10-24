@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Devlog Timer — never lose hours to the 10h cap</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230d1220'/%3E%3Ccircle cx='32' cy='32' r='18' fill='none' stroke='%23f5a742' stroke-width='5'/%3E%3Cpath d='M32 22v10l7 5' stroke='%23f5a742' stroke-width='5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <header>
+    <h1>Devlog Timer</h1>
+    <p class="tag">never lose hours to the 10-hour cap</p>
+  </header>
+
+  <section class="card timer-card">
+    <div class="clock" id="clock" role="timer">00:00:00</div>
+    <div class="phase" id="phase">ready — press start when you start coding</div>
+    <div class="controls">
+      <button id="startBtn" class="primary">Start</button>
+      <button id="stopBtn">Pause</button>
+      <button id="resetBtn">Reset session</button>
+    </div>
+    <div class="progress"><div id="bar"></div><div class="notch" style="left:80%"></div></div>
+    <p class="hint">The line marks 8h: post your devlog before it, and the next 10h window opens clean.</p>
+  </section>
+
+  <section class="card">
+    <h2>Today</h2>
+    <div class="statline"><span id="todayTotal">0m</span> coded · <span id="todayDevlogs">0</span> devlogs posted</div>
+    <div class="statline dim" id="safeHours">0h safe (banked under the cap)</div>
+    <button id="devlogBtn" class="primary">I posted a devlog</button>
+  </section>
+
+  <section class="card">
+    <h2>Rating balance</h2>
+    <p class="dim">Stardance charges 18 ratings per ship. Keep this above zero or payouts freeze.</p>
+    <div class="statline"><span id="balance">0</span> votes in hand · <span id="ships">0</span> ships</div>
+    <div class="controls">
+      <button id="voteBtn">+1 rating</button>
+      <button id="shipBtn">+1 ship (−18)</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Devlog template</h2>
+    <p class="dim">Copy this when the timer pings. One image is required; 3–6 sentences is the sweet spot.</p>
+    <pre id="template">What I made: 
+What was hard: 
+What I'm proud of: 
+Try it: (link)
+Time this devlog covers: 2h 10m</pre>
+    <button id="copyBtn">Copy template</button>
+    <span id="copied" class="flash"></span>
+  </section>
+
+  <footer>Everything is stored locally in your browser. Built for the Hack Club Stardance Frictionless mission.</footer>
+</main>
+<script src="script.js"></script>
+</body>
+</html>
