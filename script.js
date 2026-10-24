@@ -4,7 +4,7 @@
 const $ = (s) => document.querySelector(s);
 const KEY = "devlogtimer:v1";
 const state = Object.assign(
-  { running: false, sessionStart: null, sessionAccum: 0, day: "", dayMinutes: 0, week: "", weekMinutes: 0, devlogsToday: 0, ships: 0, votes: 0 },
+  { running: false, sessionStart: null, sessionAccum: 0, day: "", dayMinutes: 0, week: "", weekMinutes: 0, devlogsToday: 0, devlogLog: [], ships: 0, votes: 0 },
   JSON.parse(localStorage.getItem(KEY) || "{}")
 );
 
@@ -15,13 +15,23 @@ function weekStart() {
   d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
   return d.toISOString().slice(0, 10);
 }
-if (state.day !== today()) { state.day = today(); state.dayMinutes = 0; state.devlogsToday = 0; save(); }
+const CAP_MINUTES = 600; // 10h per devlog
+const REMIND_EVERY = 120; // 2h of coding between devlog nudges
+const WARN_AT_MS = 8 * 60 * 60 * 1000; // the 8h red line — warn before tab close
+
+if (state.day !== today()) {
+  // Rollover: banked (under-cap) minutes reset with the day, but uncapped
+  // overflow above 600 was never protected by a devlog — carry it forward
+  // instead of silently wiping it, so the over-cap line can surface it.
+  const overflow = Math.max(0, (state.dayMinutes || 0) - CAP_MINUTES);
+  state.day = today();
+  state.dayMinutes = overflow;
+  state.devlogsToday = 0;
+  save();
+}
 if (state.week !== weekStart()) { state.week = weekStart(); state.weekMinutes = 0; save(); }
 
 const BASE_TITLE = document.title;
-
-const CAP_MINUTES = 600; // 10h per devlog
-const REMIND_EVERY = 120; // 2h of coding between devlog nudges
 
 let timerId = null;
 function elapsedMs() {
@@ -39,6 +49,31 @@ function fmtTitle(ms) {
   const p = (n) => String(n).padStart(2, "0");
   const h = Math.floor(s / 3600);
   return h > 0 ? `${h}:${p(Math.floor((s % 3600) / 60))}:${p(s % 60)}` : `${p(Math.floor(s / 60))}:${p(s % 60)}`;
+}
+function fmtWhen(iso) {
+  return new Date(iso).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+}
+
+let lastLogSig = null;
+function renderLog() {
+  const entries = state.devlogLog || [];
+  const sig = entries.join("|");
+  if (sig === lastLogSig) return;
+  lastLogSig = sig;
+  const ul = $("#devlogLog");
+  ul.textContent = "";
+  if (!entries.length) {
+    const li = document.createElement("li");
+    li.className = "empty";
+    li.textContent = "none yet — your last 5 will show here";
+    ul.appendChild(li);
+    return;
+  }
+  for (const iso of entries) { // already newest first
+    const li = document.createElement("li");
+    li.textContent = fmtWhen(iso);
+    ul.appendChild(li);
+  }
 }
 
 function render() {
@@ -59,6 +94,16 @@ function render() {
   $("#todayDevlogs").textContent = state.devlogsToday;
   const banked = Math.max(0, CAP_MINUTES - sessionMin);
   $("#safeHours").textContent = `${fmtMin(Math.round(banked))} of this session still counts under the cap`;
+  // Over-cap guard: live day total (banked counter + running session) past 600.
+  const overMin = state.dayMinutes + sessionMin - CAP_MINUTES;
+  const overEl = $("#overCap");
+  if (overMin > 0) {
+    overEl.hidden = false;
+    overEl.textContent = `over the cap by ${fmtMin(Math.ceil(overMin))} — post now`;
+  } else {
+    overEl.hidden = true;
+  }
+  renderLog();
   $("#balance").textContent = state.votes - state.ships * 18;
   $("#ships").textContent = state.ships;
   $("#startBtn").disabled = state.running;
@@ -82,6 +127,7 @@ $("#resetBtn").addEventListener("click", () => {
 });
 $("#devlogBtn").addEventListener("click", () => {
   state.devlogsToday += 1;
+  state.devlogLog = [new Date().toISOString(), ...(state.devlogLog || [])].slice(0, 5);
   state.dayMinutes = Math.max(0, state.dayMinutes - CAP_MINUTES);
   save(); render();
 });
@@ -97,4 +143,14 @@ $("#copyBtn").addEventListener("click", async () => {
 });
 
 document.addEventListener("visibilitychange", render);
+
+// Tab safety: a running session past the 8h line is exactly what must not be
+// lost to a stray Cmd-W, so ask before the tab goes away.
+window.addEventListener("beforeunload", (e) => {
+  if (state.running && elapsedMs() >= WARN_AT_MS) {
+    e.preventDefault();
+    e.returnValue = ""; // required for the prompt in Chrome/Edge/Safari
+  }
+});
+
 render();

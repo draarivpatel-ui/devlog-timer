@@ -34,6 +34,11 @@ button.primary { background: var(--accent); border-color: var(--accent); color: 
 
 .statline { font-size: 15px; margin-bottom: 6px; }
 .statline.dim { font-size: 13px; }
+.overcap { color: #ff6057; font-weight: 600; font-size: 13px; margin-bottom: 8px; }
+.devlog-log { list-style: none; margin: 12px 0 0; padding: 0; font-size: 12.5px; color: var(--dim); }
+.devlog-log li { padding: 4px 0; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.devlog-log li:first-child { border-top: 0; padding-top: 0; }
+.devlog-log li.empty { font-style: italic; }
 pre {
   background: #0a0e1a; border: 1px solid var(--line); border-radius: 10px;
   padding: 12px; font: 12.5px/1.6 ui-monospace, monospace; color: var(--dim);

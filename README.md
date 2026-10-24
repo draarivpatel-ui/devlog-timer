@@ -12,10 +12,23 @@ Stardance builders that makes the payout rules visible while you code:
    vote balance so a payout never freezes on you.
 4. **Devlog template** — one-click copy of the what-I-made / what-was-hard /
    proud-of / try-it scaffold.
+5. **Tab-close guard** — closing the tab while a running session is past the
+   8h line asks for confirmation, so the nudge survives a stray Cmd-W.
+6. **Devlog history** — the last 5 "I posted a devlog" taps with timestamps,
+   newest first, persisted so your cadence is visible.
+7. **Rollover guard** — uncapped overflow above 600 minutes carries into the
+   new day instead of vanishing at midnight, and a red "over the cap by
+   Xh Ym — post now" line appears whenever the day total is past the cap.
+8. **Installable (PWA-lite)** — web app manifest with a dark theme and
+   star-on-dark icons, so the timer can run in its own window from the dock.
 
 Vanilla HTML/CSS/JS, zero dependencies, everything in localStorage.
 
 Live: https://aariv.me/devlog-timer/
+
+Manual browser checks worth doing after changes: the beforeunload prompt
+(start a session, fast-forward past 8h, close the tab) and the install
+prompt (Chrome/Safari → Install "Devlog Timer").
 
 ## Honest AI note
 
