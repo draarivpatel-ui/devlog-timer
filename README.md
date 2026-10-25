@@ -24,11 +24,19 @@ Stardance builders that makes the payout rules visible while you code:
 
 Vanilla HTML/CSS/JS, zero dependencies, everything in localStorage.
 
+![Devlog Timer watching the cap](screenshot.png)
+
 Live: https://aariv.me/devlog-timer/
 
 Manual browser checks worth doing after changes: the beforeunload prompt
 (start a session, fast-forward past 8h, close the tab) and the install
 prompt (Chrome/Safari → Install "Devlog Timer").
+
+## Why I built this
+
+I lost about a hundred hours of payout to the 10-hour devlog cap in one
+backfilled devlog, so I built the watchman I needed: the cap, visible while
+you code, with a nudge before it's too late.
 
 ## Honest AI note
 
