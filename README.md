@@ -3,23 +3,23 @@
 Never lose hours to the 10-hour cap. A single-page timer for Hack Club
 Stardance builders that makes the payout rules visible while you code:
 
-1. **Cap meter** — a session clock with the 10-hour devlog cap drawn as a
+1. **Cap meter** - a session clock with the 10-hour devlog cap drawn as a
    progress bar and a red line at 8h ("post before this"). The status line
    counts down both the next 2-hour devlog nudge and the cap.
-2. **Today tracker** — daily coded minutes and devlogs posted, with an
+2. **Today tracker** - daily coded minutes and devlogs posted, with an
    "I posted a devlog" button that banks the safe hours.
-3. **Rating balance** — counts the 18-ratings-per-ship debt; shows your live
+3. **Rating balance** - counts the 18-ratings-per-ship debt; shows your live
    vote balance so a payout never freezes on you.
-4. **Devlog template** — one-click copy of the what-I-made / what-was-hard /
+4. **Devlog template** - one-click copy of the what-I-made / what-was-hard /
    proud-of / try-it scaffold.
-5. **Tab-close guard** — closing the tab while a running session is past the
+5. **Tab-close guard** - closing the tab while a running session is past the
    8h line asks for confirmation, so the nudge survives a stray Cmd-W.
-6. **Devlog history** — the last 5 "I posted a devlog" taps with timestamps,
+6. **Devlog history** - the last 5 "I posted a devlog" taps with timestamps,
    newest first, persisted so your cadence is visible.
-7. **Rollover guard** — uncapped overflow above 600 minutes carries into the
+7. **Rollover guard** - uncapped overflow above 600 minutes carries into the
    new day instead of vanishing at midnight, and a red "over the cap by
-   Xh Ym — post now" line appears whenever the day total is past the cap.
-8. **Installable (PWA-lite)** — web app manifest with a dark theme and
+   Xh Ym - post now" line appears whenever the day total is past the cap.
+8. **Installable (PWA-lite)** - web app manifest with a dark theme and
    star-on-dark icons, so the timer can run in its own window from the dock.
 
 Vanilla HTML/CSS/JS, zero dependencies, everything in localStorage.

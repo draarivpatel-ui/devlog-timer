@@ -1,4 +1,4 @@
-/* Devlog Timer — the 10-hour cap, made visible. */
+/* Devlog Timer - the 10-hour cap, made visible. */
 "use strict";
 
 const $ = (s) => document.querySelector(s);
@@ -17,11 +17,11 @@ function weekStart() {
 }
 const CAP_MINUTES = 600; // 10h per devlog
 const REMIND_EVERY = 120; // 2h of coding between devlog nudges
-const WARN_AT_MS = 8 * 60 * 60 * 1000; // the 8h red line — warn before tab close
+const WARN_AT_MS = 8 * 60 * 60 * 1000; // the 8h red line - warn before tab close
 
 if (state.day !== today()) {
   // Rollover: banked (under-cap) minutes reset with the day, but uncapped
-  // overflow above 600 was never protected by a devlog — carry it forward
+  // overflow above 600 was never protected by a devlog - carry it forward
   // instead of silently wiping it, so the over-cap line can surface it.
   const overflow = Math.max(0, (state.dayMinutes || 0) - CAP_MINUTES);
   state.day = today();
@@ -65,7 +65,7 @@ function renderLog() {
   if (!entries.length) {
     const li = document.createElement("li");
     li.className = "empty";
-    li.textContent = "none yet — your last 5 will show here";
+    li.textContent = "none yet - your last 5 will show here";
     ul.appendChild(li);
     return;
   }
@@ -84,9 +84,9 @@ function render() {
   $("#bar").style.width = Math.min((sessionMin / CAP_MINUTES) * 100, 100) + "%";
   const phase = $("#phase");
   const sinceNudge = sessionMin % REMIND_EVERY;
-  if (!state.running && sessionMin === 0) { phase.textContent = "ready — press start when you start coding"; phase.className = "phase"; }
-  else if (sessionMin >= CAP_MINUTES) { phase.textContent = "over the cap — post a devlog now, extra time is lost"; phase.className = "phase warn"; }
-  else if (sinceNudge < 1 && sessionMin > 5) { phase.textContent = "devlog window open — post one while it counts"; phase.className = "phase warn"; }
+  if (!state.running && sessionMin === 0) { phase.textContent = "ready - press start when you start coding"; phase.className = "phase"; }
+  else if (sessionMin >= CAP_MINUTES) { phase.textContent = "over the cap - post a devlog now, extra time is lost"; phase.className = "phase warn"; }
+  else if (sinceNudge < 1 && sessionMin > 5) { phase.textContent = "devlog window open - post one while it counts"; phase.className = "phase warn"; }
   else { phase.textContent = `next devlog nudge in ${fmtMin(REMIND_EVERY - sinceNudge)} · cap at ${fmtMin(CAP_MINUTES - sessionMin)} left`; phase.className = "phase"; }
 
   $("#todayTotal").textContent = fmtMin(Math.round(state.dayMinutes + sessionMin));
@@ -99,7 +99,7 @@ function render() {
   const overEl = $("#overCap");
   if (overMin > 0) {
     overEl.hidden = false;
-    overEl.textContent = `over the cap by ${fmtMin(Math.ceil(overMin))} — post now`;
+    overEl.textContent = `over the cap by ${fmtMin(Math.ceil(overMin))} - post now`;
   } else {
     overEl.hidden = true;
   }
