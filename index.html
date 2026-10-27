@@ -3,64 +3,204 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#0d1220">
-<title>Devlog Timer - never lose hours to the 10h cap</title>
+<meta name="theme-color" content="#0b101d">
+<title>Devlog Timer — Stardance 10h Cap Chronograph &amp; Devlog Workbench</title>
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230d1220'/%3E%3Ccircle cx='32' cy='32' r='18' fill='none' stroke='%23f5a742' stroke-width='5'/%3E%3Cpath d='M32 22v10l7 5' stroke='%23f5a742' stroke-width='5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b101d'/%3E%3Ccircle cx='32' cy='32' r='18' fill='none' stroke='%23f5a742' stroke-width='5'/%3E%3Cpath d='M32 22v10l7 5' stroke='%23f5a742' stroke-width='5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<main>
-  <header>
-    <h1>Devlog Timer</h1>
-    <p class="tag">never lose hours to the 10-hour cap</p>
+<div class="workbench">
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">STARDANCE CHRONOGRAPH // 10-HOUR CAP WATCHMAN</div>
+      <h1>Devlog Timer</h1>
+      <p class="tag">Built after losing ~78 hours to the 10-hour single-devlog cap — keep the cap visible while you build.</p>
+    </div>
+    <div class="topbar-actions">
+      <button type="button" id="soundToggleBtn" class="ghost-btn" aria-pressed="true" title="Toggle Web Audio synthesized chimes">🔔 Chimes: ON</button>
+      <button type="button" id="testChimeBtn" class="ghost-btn" title="Preview Web Audio bell chime">Test Chime</button>
+      <button type="button" id="exportJsonBtn" class="ghost-btn">Export JSON</button>
+      <label class="ghost-btn file-label" for="importJsonInput">Import JSON<input type="file" id="importJsonInput" accept="application/json" hidden></label>
+    </div>
   </header>
 
-  <section class="card timer-card">
-    <div class="clock" id="clock" role="timer">00:00:00</div>
-    <div class="phase" id="phase">ready - press start when you start coding</div>
-    <div class="controls">
-      <button id="startBtn" class="primary">Start</button>
-      <button id="stopBtn">Pause</button>
-      <button id="resetBtn">Reset session</button>
+  <div class="grid-layout">
+    <!-- Left Column: Radial 10h Chronograph + Pomodoro Sprint + Today Rollover + Rating Gate -->
+    <div class="col">
+      <section class="card timer-card" aria-labelledby="chrono-heading">
+        <div class="card-head">
+          <h2 id="chrono-heading">10-Hour Cap Chronograph</h2>
+          <span class="kbd-hint"><kbd>Space</kbd> Start/Pause · <kbd>M</kbd> Log Note · <kbd>C</kbd> Copy Devlog</span>
+        </div>
+
+        <div class="dial-stage">
+          <svg class="radial-dial" viewBox="0 0 260 260" aria-label="10-hour session cap radial gauge">
+            <defs>
+              <linearGradient id="dialGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#28c840" />
+                <stop offset="75%" stop-color="#f5a742" />
+                <stop offset="100%" stop-color="#ff5f57" />
+              </linearGradient>
+            </defs>
+            <!-- Background track -->
+            <circle class="dial-track" cx="130" cy="130" r="104" />
+            <!-- 8h Warning Zone Arc (80% to 100%) -->
+            <circle class="dial-warn-zone" cx="130" cy="130" r="104" stroke-dasharray="130.7 653.45" stroke-dashoffset="-522.76" />
+            <!-- Live Progress Arc (circumference = 2 * pi * 104 = 653.45) -->
+            <circle class="dial-progress" id="dialArc" cx="130" cy="130" r="104" stroke="url(#dialGrad)" stroke-dasharray="653.45" stroke-dashoffset="653.45" />
+            <!-- Checkpoint Tick Labels (0h/10h top, 2h, 4h, 6h, 8h) -->
+            <g class="dial-ticks">
+              <text x="130" y="16" text-anchor="middle">10h CAP</text>
+              <text x="240" y="96" text-anchor="start">2h</text>
+              <text x="200" y="228" text-anchor="middle">4h</text>
+              <text x="60" y="228" text-anchor="middle">6h</text>
+              <text x="18" y="96" text-anchor="end" class="warn-tick">8h WARN</text>
+            </g>
+          </svg>
+          <div class="dial-center">
+            <div class="clock" id="clock" role="timer" aria-live="off">00:00:00</div>
+            <div class="dial-sub" id="capPercent">0.0% of 10h cap</div>
+            <div class="pomo-pill" id="pomoBadge">Sprint: 25:00 Focus</div>
+          </div>
+        </div>
+
+        <div class="phase" id="phase">Ready — press Start (or Space) when you start coding</div>
+
+        <div class="controls">
+          <button type="button" id="startBtn" class="primary">Start Session</button>
+          <button type="button" id="stopBtn">Pause &amp; Bank</button>
+          <button type="button" id="resetBtn">Reset Session</button>
+          <button type="button" id="ffDemoBtn" class="ghost-btn" title="Simulate +30m elapsed for testing nudges">+30m Test</button>
+        </div>
+
+        <div class="progress" title="Linear 10-hour cap bar with 2h checkpoint ticks and 8h red warning line">
+          <div id="bar"></div>
+          <div class="tick" style="left:20%" title="2h devlog nudge"></div>
+          <div class="tick" style="left:40%" title="4h devlog nudge"></div>
+          <div class="tick" style="left:60%" title="6h devlog nudge"></div>
+          <div class="notch" style="left:80%" title="8h warning threshold"></div>
+        </div>
+        <p class="hint">Ticks mark 2h devlog checkpoints. The red line at 8h is your safety cutoff before the hard 10h cap.</p>
+
+        <!-- Dual-Mode Pomodoro Sprint Sub-Panel -->
+        <div class="pomo-box">
+          <div class="pomo-header">
+            <strong>Pomodoro Sprint Cadence</strong>
+            <span class="dim" id="pomoStatusText">Focus sprint ready</span>
+          </div>
+          <div class="pomo-controls">
+            <button type="button" class="chip-btn active" data-pomo-work="25" data-pomo-break="5">25 / 5m</button>
+            <button type="button" class="chip-btn" data-pomo-work="50" data-pomo-break="10">50 / 10m</button>
+            <button type="button" class="chip-btn" data-pomo-work="90" data-pomo-break="15">90 / 15m</button>
+            <label class="custom-pomo">
+              <span>Custom (m):</span>
+              <input type="number" id="customPomoMin" min="5" max="180" value="25" aria-label="Custom focus sprint minutes">
+            </label>
+            <button type="button" id="pomoResetBtn" class="ghost-btn">Restart Sprint</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="today-heading">
+        <div class="card-head">
+          <h2 id="today-heading">Today &amp; Midnight Rollover Guard</h2>
+          <span class="badge-pill" id="safeHours">10h 0m safe under cap</span>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-box">
+            <span class="stat-label">Coded Today</span>
+            <strong id="todayTotal">0m</strong>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">This Week</span>
+            <strong id="weekTotal">0m</strong>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">Devlogs Today</span>
+            <strong id="todayDevlogs">0</strong>
+          </div>
+        </div>
+        <p class="overcap" id="overCap" hidden></p>
+        <div class="controls" style="justify-content: flex-start; margin-top: 10px;">
+          <button type="button" id="devlogBtn" class="primary">I Posted a Devlog (Bank Hours)</button>
+        </div>
+        <ul class="devlog-log" id="devlogLog" aria-label="Last 5 devlogs posted"></ul>
+      </section>
+
+      <section class="card" aria-labelledby="rating-heading">
+        <div class="card-head">
+          <h2 id="rating-heading">18-Vote Ship Gate Balance</h2>
+          <span class="badge-pill" id="shipGateBadge">Payout Gate: READY</span>
+        </div>
+        <p class="dim">Stardance requires 18 peer ratings per shipped project. Keep your vote balance at or above zero so payouts never stall.</p>
+        <div class="statline" style="margin-top:8px;">
+          <strong><span id="balance">0</span> net vote balance</strong> · <span id="totalVotes">0</span> peer ratings cast · <span id="ships">0</span> ships (<span id="votesNeeded">0</span> votes until next ship)
+        </div>
+        <div class="controls" style="justify-content: flex-start; margin-top: 10px; margin-bottom: 0;">
+          <button type="button" id="voteBtn" class="primary">+1 Peer Rating Cast</button>
+          <button type="button" id="vote5Btn">+5 Ratings</button>
+          <button type="button" id="shipBtn">+1 Ship (−18 Votes)</button>
+        </div>
+      </section>
     </div>
-    <div class="progress"><div id="bar"></div><div class="notch" style="left:80%"></div></div>
-    <p class="hint">The line marks 8h: post your devlog before it, and the next 10h window opens clean.</p>
-  </section>
 
-  <section class="card">
-    <h2>Today</h2>
-    <div class="statline"><span id="todayTotal">0m</span> coded · <span id="weekTotal">0m</span> this week · <span id="todayDevlogs">0</span> devlogs posted</div>
-    <div class="statline dim" id="safeHours">0h safe (banked under the cap)</div>
-    <p class="overcap" id="overCap" hidden></p>
-    <button id="devlogBtn" class="primary">I posted a devlog</button>
-    <ul class="devlog-log" id="devlogLog" aria-label="Last 5 devlogs posted"></ul>
-  </section>
+    <!-- Right Column: Timestamped Milestone Logger + Live Markdown Devlog Compiler -->
+    <div class="col">
+      <section class="card" aria-labelledby="milestones-heading">
+        <div class="card-head">
+          <h2 id="milestones-heading">Timestamped Commit &amp; Milestone Splits</h2>
+          <span class="dim" id="milestoneCount">0 notes in session</span>
+        </div>
+        <p class="dim">Jot down what you just wired up or fixed while the timer runs. Notes feed directly into the Markdown Devlog Compiler below.</p>
 
-  <section class="card">
-    <h2>Rating balance</h2>
-    <p class="dim">Stardance charges 18 ratings per ship. Keep this above zero or payouts freeze.</p>
-    <div class="statline"><span id="balance">0</span> votes in hand · <span id="ships">0</span> ships</div>
-    <div class="controls">
-      <button id="voteBtn">+1 rating</button>
-      <button id="shipBtn">+1 ship (−18)</button>
+        <form id="milestoneForm" class="milestone-form">
+          <select id="milestoneTag" aria-label="Milestone category">
+            <option value="Feature">Feature</option>
+            <option value="Bugfix">Bugfix</option>
+            <option value="Refactor">Refactor</option>
+            <option value="Test">Test / QA</option>
+          </select>
+          <input type="text" id="milestoneInput" placeholder="e.g. Added SVG radial dial and midnight rollover carry..." maxlength="160" required>
+          <button type="submit" class="primary">Log Split</button>
+        </form>
+
+        <ul class="milestone-list" id="milestoneList" aria-label="Logged session milestones"></ul>
+      </section>
+
+      <section class="card" aria-labelledby="compiler-heading">
+        <div class="card-head">
+          <h2 id="compiler-heading">Live Markdown Devlog Compiler</h2>
+          <span class="badge-pill" id="wordCountBadge">0 words · 0 chars</span>
+        </div>
+        <p class="dim">Auto-compiles your session duration and timestamped splits into a ready-to-paste Stardance devlog.</p>
+
+        <div class="compiler-fields">
+          <label class="field-group">
+            <span>What was tricky / hard to get right:</span>
+            <input type="text" id="trickyInput" placeholder="e.g. Preserving uncapped overflow across midnight rollover without double-counting...">
+          </label>
+          <label class="field-group">
+            <span>How to try it (Live URL / command):</span>
+            <input type="text" id="tryItInput" value="https://aariv.me/devlog-timer/">
+          </label>
+        </div>
+
+        <pre id="template" aria-label="Compiled Markdown devlog output"></pre>
+
+        <div class="controls" style="justify-content: flex-start; margin-bottom: 0;">
+          <button type="button" id="copyBtn" class="primary">Copy Compiled Markdown (C)</button>
+          <button type="button" id="clearMilestonesBtn">Clear Session Notes</button>
+          <span id="copied" class="flash" aria-live="polite"></span>
+        </div>
+      </section>
     </div>
-  </section>
+  </div>
 
-  <section class="card">
-    <h2>Devlog template</h2>
-    <p class="dim">Copy this when the timer pings. One image is required; 3-6 sentences is the sweet spot.</p>
-    <pre id="template">What I made: 
-What was hard: 
-What I'm proud of: 
-Try it: (link)
-Time this devlog covers: 2h 10m</pre>
-    <button id="copyBtn">Copy template</button>
-    <span id="copied" class="flash"></span>
-  </section>
-
-  <footer>Everything is stored locally in your browser. Built for the Hack Club Stardance Frictionless mission.</footer>
-</main>
+  <footer>
+    <span>100% local in <code>localStorage</code> · Zero external dependencies · Web Audio API chime synth · Built by Aariv Patel (<a href="https://aariv.me">aariv.me</a>)</span>
+  </footer>
+</div>
 <script src="script.js"></script>
 </body>
 </html>
