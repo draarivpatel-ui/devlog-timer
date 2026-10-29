@@ -1,4 +1,4 @@
-/* Devlog Timer — Stardance 10-Hour Cap Chronograph & Devlog Workbench */
+/* Devlog Timer - Stardance 10-Hour Cap Chronograph & Devlog Workbench */
 "use strict";
 
 const $ = (s) => document.querySelector(s);
@@ -162,7 +162,7 @@ function renderLog() {
   if (!entries.length) {
     const li = document.createElement("li");
     li.className = "empty";
-    li.textContent = "No devlogs banked yet — your last 5 posts will appear here.";
+    li.textContent = "No devlogs banked yet - your last 5 posts will appear here.";
     ul.appendChild(li);
     return;
   }
@@ -187,7 +187,7 @@ function renderMilestones() {
   if (!items.length) {
     const li = document.createElement("li");
     li.className = "milestone-item dim";
-    li.textContent = "No splits logged yet — press M to jot a timestamped commit note.";
+    li.textContent = "No splits logged yet - press M to jot a timestamped commit note.";
     list.appendChild(li);
     return;
   }
@@ -265,7 +265,7 @@ function renderPomodoro(ms) {
     : `Sprint #${cycleNum}: ${fmtMMSS(remaining)} Break`;
   $("#pomoStatusText").textContent = inFocus
     ? `Focus block (${state.pomoWorkMin}m work / ${state.pomoBreakMin}m break)`
-    : `Break window — stretch & hydrate (${state.pomoBreakMin}m)`;
+    : `Break window - stretch & hydrate (${state.pomoBreakMin}m)`;
 }
 
 function render() {
@@ -295,16 +295,16 @@ function render() {
   const phase = $("#phase");
   const sinceNudge = sessionMin % REMIND_EVERY;
   if (!state.running && sessionMin === 0) {
-    phase.textContent = "Ready — press Start (or Space) when you start coding";
+    phase.textContent = "Ready - press Start (or Space) when you start coding";
     phase.className = "phase";
   } else if (sessionMin >= CAP_MINUTES) {
-    phase.textContent = "OVER THE 10h CAP — post your devlog immediately, extra hours won't count!";
+    phase.textContent = "OVER THE 10h CAP - post your devlog immediately, extra hours won't count!";
     phase.className = "phase danger";
   } else if (sessionMin >= 480) {
-    phase.textContent = `PAST 8h WARNING LINE — post devlog now (${fmtMin(CAP_MINUTES - sessionMin)} until hard cap)`;
+    phase.textContent = `PAST 8h WARNING LINE - post devlog now (${fmtMin(CAP_MINUTES - sessionMin)} until hard cap)`;
     phase.className = "phase warn";
   } else if (sinceNudge < 2 && sessionMin >= REMIND_EVERY) {
-    phase.textContent = "2-hour checkpoint reached — great time to post a devlog with a screenshot!";
+    phase.textContent = "2-hour checkpoint reached - great time to post a devlog with a screenshot!";
     phase.className = "phase warn";
   } else {
     phase.textContent = `Next 2h devlog nudge in ${fmtMin(REMIND_EVERY - sinceNudge)} · ${fmtMin(CAP_MINUTES - sessionMin)} left under 10h cap`;
@@ -328,7 +328,7 @@ function render() {
   const overEl = $("#overCap");
   if (overMin > 0) {
     overEl.hidden = false;
-    overEl.textContent = `⚠️ Over the 10-hour daily cap by ${fmtMin(Math.ceil(overMin))} — post a devlog now to bank your hours!`;
+    overEl.textContent = `⚠️ Over the 10-hour daily cap by ${fmtMin(Math.ceil(overMin))} - post a devlog now to bank your hours!`;
   } else {
     overEl.hidden = true;
   }
@@ -546,6 +546,34 @@ async function copyCompiledMarkdown() {
 }
 
 $("#copyBtn").addEventListener("click", copyCompiledMarkdown);
+
+$("#downloadMdBtn").addEventListener("click", () => {
+  const mdText = $("#template").textContent || "";
+  const blob = new Blob([mdText], { type: "text/markdown" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `devlog-${today()}.md`;
+  a.click();
+  URL.revokeObjectURL(url);
+  $("#copied").textContent = "Downloaded .md file";
+  setTimeout(() => ($("#copied").textContent = ""), 1800);
+});
+
+$("#seedSampleBtn").addEventListener("click", () => {
+  const baseElapsed = fmt(elapsedMs());
+  state.milestones.push(
+    { time: baseElapsed, tag: "Feature", text: "Wired SVG radial 10h cap gauge and 2h Web Audio checkpoint chimes" },
+    { time: baseElapsed, tag: "Bugfix", text: "Fixed midnight rollover so uncapped overflow minutes carry into the new day" }
+  );
+  if (!state.trickyNote) {
+    state.trickyNote = "Making sure uncapped overflow above 600 minutes carries across midnight without double-counting banked hours.";
+    $("#trickyInput").value = state.trickyNote;
+  }
+  save();
+  render();
+});
+
 
 // JSON Export / Import
 $("#exportJsonBtn").addEventListener("click", () => {
