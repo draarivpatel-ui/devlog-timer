@@ -563,8 +563,8 @@ $("#downloadMdBtn").addEventListener("click", () => {
 $("#seedSampleBtn").addEventListener("click", () => {
   const baseElapsed = fmt(elapsedMs());
   state.milestones.push(
-    { time: baseElapsed, tag: "Feature", text: "Wired SVG radial 10h cap gauge and 2h Web Audio checkpoint chimes" },
-    { time: baseElapsed, tag: "Bugfix", text: "Fixed midnight rollover so uncapped overflow minutes carry into the new day" }
+    { at: baseElapsed, tag: "Feature", text: "Wired SVG radial 10h cap gauge and 2h Web Audio checkpoint chimes" },
+    { at: baseElapsed, tag: "Bugfix", text: "Fixed midnight rollover so uncapped overflow minutes carry into the new day" }
   );
   if (!state.trickyNote) {
     state.trickyNote = "Making sure uncapped overflow above 600 minutes carries across midnight without double-counting banked hours.";
