@@ -37,14 +37,19 @@ function save() {
   localStorage.setItem(KEY, JSON.stringify(state));
 }
 
+function localDate(d) {
+  const p = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
 function today() {
-  return new Date().toISOString().slice(0, 10);
+  return localDate(new Date());
 }
 
 function weekStart() {
   const d = new Date();
   d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
-  return d.toISOString().slice(0, 10);
+  return localDate(d);
 }
 
 // Midnight rollover guard: banked under-cap minutes reset on a new day,
